@@ -1,0 +1,271 @@
+package com.sunbase.service;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
+
+import com.sunbase.DTO.UpdateCustomerDTO;
+import com.sunbase.exception.AdminException;
+import com.sunbase.exception.CustomerException;
+import com.sunbase.exception.LoginException;
+import com.sunbase.model.Admin;
+import com.sunbase.model.Authority;
+import com.sunbase.model.Customer;
+import com.sunbase.model.Role;
+import com.sunbase.repository.AdminRepo;
+import com.sunbase.repository.CustomerRepo;
+
+import jakarta.annotation.PostConstruct;
+
+@Service
+public class AdminServiceImpl implements AdminService{
+	
+	@Autowired
+	private RestTemplate restTemplate;
+	
+	@Autowired
+	private AdminRepo adminRepo;
+	
+	@Autowired
+	private CustomerRepo customerRepo;
+	
+	@Autowired
+	private PasswordEncoder encoder;
+	
+	@PostConstruct
+	public void init() {
+		String defaultAdminEmail = "admin@mail.com";
+        String defaultAdminPassword = "admin123";
+        Optional<Admin> opt= adminRepo.findByEmail(defaultAdminEmail);
+        if(opt.isEmpty()) {
+			Admin admin=new Admin();
+			admin.setName("Admin");
+			admin.setEmail(defaultAdminEmail);
+			admin.setPassword(encoder.encode(defaultAdminPassword));
+			List<Authority> auths= new ArrayList<>();
+			auths.add(new Authority(null,Role.ROLE_ADMIN,admin));
+			admin.setAuthorities(auths);
+			adminRepo.save(admin);
+        }
+		
+	}
+
+	@Override
+	public String addCustomer(Customer customer) {
+		if(customer.getUuid()==null) {
+			UUID uuid = UUID.randomUUID();
+			customer.setUuid(uuid.toString());
+			Customer newCustomer=customerRepo.save(customer);
+			return "Sucessfully registered with uuid :-"+newCustomer.getUuid();
+		}else {
+			Optional<Customer>opt= customerRepo.findById(customer.getUuid());
+			if(opt.isPresent()) {
+				Customer cust=opt.get();
+				cust.setFirstName(customer.getFirstName());
+				cust.setLast_name(customer.getLast_name());
+				cust.setDob(customer.getDob());
+				cust.setEmail(customer.getEmail());
+				cust.setPhone(customer.getPhone());
+				cust.setPhoto(customer.getPhoto());
+				cust.setAddress(customer.getAddress());
+				cust.setCity(customer.getCity());
+				cust.setGender(customer.getGender());
+				cust.setState(customer.getState());
+				cust.setStreet(customer.getStreet());
+				customerRepo.save(cust);
+				return "Sucessfully updated with  uuId :-"+cust.getUuid();
+			}
+			Customer newCustomer=customerRepo.save(customer);
+			return "Sucessfully registered with uuId :-"+newCustomer.getUuid();
+		}
+		
+	}
+
+	@Override
+	public Admin addAdmin(Admin admin) {
+		
+		List<Authority> list=new ArrayList<>();
+		list.add(new Authority(null,Role.ROLE_ADMIN, admin));
+		admin.setAuthorities(list);
+		Admin newAdmin=adminRepo.save(admin);
+		return newAdmin;
+		
+	}
+
+	@Override
+	public String updateCustomer(UpdateCustomerDTO updateCustomerDTO) throws LoginException {
+		//Here we get my user
+		Customer customer=customerRepo.findById(updateCustomerDTO.getUuid())
+				.orElseThrow(() -> new CustomerException("Inviled customer id."));
+		
+		//updated its field
+		if(updateCustomerDTO.getDob()!=null) {
+			customer.setDob(updateCustomerDTO.getDob());
+		}
+		if(updateCustomerDTO.getEmail()!=null) {
+			customer.setEmail(updateCustomerDTO.getEmail());
+		}
+		if(updateCustomerDTO.getFirst_name()!=null) {
+			customer.setFirstName(updateCustomerDTO.getFirst_name());
+		}
+		if(updateCustomerDTO.getLast_name()!=null) {
+			customer.setLast_name(updateCustomerDTO.getLast_name());
+		}
+		if(updateCustomerDTO.getCity()!=null) {
+			customer.setCity(updateCustomerDTO.getCity());
+		}
+		if(updateCustomerDTO.getPhone()!=null) {
+			customer.setPhone(updateCustomerDTO.getPhone());
+		}
+		
+		if(updateCustomerDTO.getAddress()!=null) {
+			customer.setAddress(updateCustomerDTO.getAddress());
+		}
+		
+		if(updateCustomerDTO.getGender()!=null) {
+			customer.setGender(updateCustomerDTO.getGender());
+		}
+		
+		if(updateCustomerDTO.getState()!=null) {
+			customer.setStreet(updateCustomerDTO.getState());
+		}
+		if(updateCustomerDTO.getStreet()!=null) {
+			customer.setStreet(updateCustomerDTO.getStreet());
+		}
+		if(updateCustomerDTO.getPhoto()!=null) {
+			customer.setPhoto(updateCustomerDTO.getPhoto());
+		}
+		//Saved updated user
+		customerRepo.save(customer);
+		return "user updated successfully";
+	}
+
+	@Override
+	public Admin getOwnProfile() {
+		
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		Admin admin = adminRepo.findByEmail(authentication.getName())
+				.orElseThrow(() -> new LoginException("Please Login First"));
+		return admin;
+		
+	}
+
+	@Override
+	public String deleteCustomer(String id) {
+		
+		Customer customer=customerRepo.findById(id)
+				.orElseThrow(() -> new CustomerException("Inviled customer id."));
+		customerRepo.delete(customer);
+		return "Deleted";
+	}
+
+	@Override
+	public String deleteAdmin(Integer id) {
+		Admin admin=adminRepo.findById(id)
+				.orElseThrow(() -> new AdminException("Inviled admin id."));
+		adminRepo.delete(admin);
+		return "Deleted";
+	}
+
+	@Override
+	public Customer getCustomerById(String id) {
+
+		Customer customer=customerRepo.findById(id)
+				.orElseThrow(() -> new CustomerException("Inviled customer id."));
+		return customer;
+		
+	}
+
+	@Override
+	public List<Customer> getAllCustomer() {
+
+		List<Customer> list=customerRepo.findAll();
+		return list;
+	}
+
+	@Override
+	public List<Customer> getAllCustomer(String search, Integer pageNo, Integer noOfItem, String field,String direction,String fieldSerch
+		) {
+
+		if(direction.toUpperCase().equals("ASC")||direction.toUpperCase().equals("DSC")) {
+			
+			PageRequest p = PageRequest.of(pageNo-1, noOfItem, direction.toUpperCase().equals("ASC") ? Sort.by(field).ascending() : Sort.by(field).descending());
+			List<Customer> students= null;
+			System.out.println(fieldSerch);
+			 switch (fieldSerch.toLowerCase()) {
+	            case "first_name":
+	            	Page<Customer> page= customerRepo.allCustomerByFirstName(search, p);
+	            	students= page.getContent();
+	            	break;
+	            case "city":
+	            	Page<Customer> page2= customerRepo.findByCityContaining(search, p);
+	            	students= page2.getContent();
+	            	break;
+	            case "email":
+	            	Page<Customer> page3= customerRepo.findByEmailContaining(search, p);
+	            	students= page3.getContent();
+	            	break;
+	            case "phone":
+	            	Page<Customer> page4= customerRepo.findByPhoneContaining(search, p);
+	            	students= page4.getContent();
+	            	break;
+	            default:
+	            	Page<Customer> page5= customerRepo.findAll(p);
+	            	students= page5.getContent();
+	            	break;
+	        }
+			
+			if(students.isEmpty()) {
+				throw new CustomerException("No any costomer found.");
+			}else 
+				return students;
+			
+		}else
+			throw new CustomerException("Inviled direction.");	
+			
+	}
+	
+	@Override
+    public List<Customer> getCustomerList(String token) {
+        String url = "https://qa.sunbasedata.com/sunbase/portal/api/assignment.jsp";
+
+       
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer " + token);
+
+        
+        UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(url)
+            .queryParam("cmd", "get_customer_list");
+
+        
+        HttpEntity<Void> entity = new HttpEntity<>(headers);
+
+      
+        ResponseEntity<Customer[]> response = restTemplate.exchange(
+            builder.toUriString(), 
+            HttpMethod.GET, 
+            entity, Customer[].class
+        );
+
+       
+        return Arrays.asList(response.getBody());
+    }
+
+}

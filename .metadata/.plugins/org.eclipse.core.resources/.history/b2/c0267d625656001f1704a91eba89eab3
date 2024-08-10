@@ -1,0 +1,214 @@
+package com.sunbase.service;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
+import com.sunbase.DTO.UpdateCustomerDTO;
+import com.sunbase.exception.AdminException;
+import com.sunbase.exception.CustomerException;
+import com.sunbase.exception.LoginException;
+import com.sunbase.model.Admin;
+import com.sunbase.model.Authority;
+import com.sunbase.model.Customer;
+import com.sunbase.model.Role;
+import com.sunbase.repository.AdminRepo;
+import com.sunbase.repository.CustomerRepo;
+
+import jakarta.annotation.PostConstruct;
+
+@Service
+public class AdminServiceImpl implements AdminService{
+	
+	@Autowired
+	private AdminRepo adminRepo;
+	
+	@Autowired
+	private CustomerRepo customerRepo;
+	
+	@Autowired
+	private PasswordEncoder encoder;
+	
+	@PostConstruct
+	public void init() {
+		String defaultAdminEmail = "admin@mail.com";
+        String defaultAdminPassword = "admin123";
+        Optional<Admin> opt= adminRepo.findByEmail(defaultAdminEmail);
+        if(opt.isEmpty()) {
+			Admin admin=new Admin();
+			admin.setName("Admin");
+			admin.setEmail(defaultAdminEmail);
+			admin.setPassword(encoder.encode(defaultAdminPassword));
+			List<Authority> auths= new ArrayList<>();
+			auths.add(new Authority(null,Role.ROLE_ADMIN,admin));
+			admin.setAuthorities(auths);
+			adminRepo.save(admin);
+        }
+		
+	}
+
+	@Override
+	public Customer addCustomer(Customer customer) {
+		
+		Customer newCustomer=customerRepo.save(customer);
+		return newCustomer;
+	}
+
+	@Override
+	public Admin addAdmin(Admin admin) {
+		
+		List<Authority> list=new ArrayList<>();
+		list.add(new Authority(null,Role.ROLE_ADMIN, admin));
+		admin.setAuthorities(list);
+		Admin newAdmin=adminRepo.save(admin);
+		return newAdmin;
+		
+	}
+
+	@Override
+	public String updateCustomer(UpdateCustomerDTO updateCustomerDTO) throws LoginException {
+		//Here we get my user
+		Customer customer=customerRepo.findById(updateCustomerDTO.getId())
+				.orElseThrow(() -> new CustomerException("Inviled customer id."));
+		
+		//updated its field
+		if(updateCustomerDTO.getDob()!=null) {
+			customer.setDob(updateCustomerDTO.getDob());
+		}
+		if(updateCustomerDTO.getEmail()!=null) {
+			customer.setEmail(updateCustomerDTO.getEmail());
+		}
+		if(updateCustomerDTO.getFirst_name()!=null) {
+			customer.setFirstName(updateCustomerDTO.getFirst_name());
+		}
+		if(updateCustomerDTO.getLast_name()!=null) {
+			customer.setLastName(updateCustomerDTO.getLast_name());
+		}
+		if(updateCustomerDTO.getCity()!=null) {
+			customer.setCity(updateCustomerDTO.getCity());
+		}
+		if(updateCustomerDTO.getPhone()!=null) {
+			customer.setPhone(updateCustomerDTO.getPhone());
+		}
+		
+		if(updateCustomerDTO.getAddress()!=null) {
+			customer.setAddress(updateCustomerDTO.getAddress());
+		}
+		
+		if(updateCustomerDTO.getCity()!=null) {
+			customer.setCity(updateCustomerDTO.getCity());
+		}
+		
+		if(updateCustomerDTO.getCity()!=null) {
+			customer.setCity(updateCustomerDTO.getCity());
+		}
+		
+		if(updateCustomerDTO.getState()!=null) {
+			customer.setStreet(updateCustomerDTO.getStreet());
+		}
+		if(updateCustomerDTO.getState()!=null) {
+			customer.setState(updateCustomerDTO.getState());
+		}
+		if(updateCustomerDTO.getPhoto()!=null) {
+			customer.setPhoto(updateCustomerDTO.getPhoto());
+		}
+		//Saved updated user
+		customerRepo.save(customer);
+		return "user updated successfully";
+	}
+
+	@Override
+	public Admin getOwnProfile() {
+		
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		Admin admin = adminRepo.findByEmail(authentication.getName())
+				.orElseThrow(() -> new LoginException("Please Login First"));
+		return admin;
+		
+	}
+
+	@Override
+	public String deleteCustomer(Integer id) {
+		
+		Customer customer=customerRepo.findById(id)
+				.orElseThrow(() -> new CustomerException("Inviled customer id."));
+		customerRepo.delete(customer);
+		return "Deleted";
+	}
+
+	@Override
+	public String deleteAdmin(Integer id) {
+		Admin admin=adminRepo.findById(id)
+				.orElseThrow(() -> new AdminException("Inviled admin id."));
+		adminRepo.delete(admin);
+		return "Deleted";
+	}
+
+	@Override
+	public Customer getCustomerById(Integer id) {
+
+		Customer customer=customerRepo.findById(id)
+				.orElseThrow(() -> new CustomerException("Inviled customer id."));
+		return customer;
+		
+	}
+
+	@Override
+	public List<Customer> getAllCustomer() {
+
+		List<Customer> list=customerRepo.findAll();
+		return list;
+	}
+
+	@Override
+	public List<Customer> getAllCustomer(String search, Integer pageNo, Integer noOfItem, String field,String direction,String fieldSerch
+		) {
+
+		if(direction.toUpperCase().equals("ASC")||direction.toUpperCase().equals("DSC")) {
+			
+			PageRequest p = PageRequest.of(pageNo-1, noOfItem, direction.toUpperCase().equals("ASC") ? Sort.by(field).ascending() : Sort.by(field).descending());
+			List<Customer> students= null;
+			System.out.println(fieldSerch);
+			 switch (fieldSerch.toLowerCase()) {
+	            case "firstName":
+	            	Page<Customer> page= customerRepo.findByFirstNameContaining(search, p);
+	            	students= page.getContent();
+	            	break;
+	            case "city":
+	            	Page<Customer> page2= customerRepo.findByCityContaining(search, p);
+	            	students= page2.getContent();
+	            	break;
+	            case "email":
+	            	Page<Customer> page3= customerRepo.findByEmailContaining(search, p);
+	            	students= page3.getContent();
+	            	break;
+	            case "phone":
+	            	Page<Customer> page4= customerRepo.findByPhoneContaining(search, p);
+	            	students= page4.getContent();
+	            	break;
+	            default:
+	            	Page<Customer> page5= customerRepo.findAll(p);
+	            	students= page5.getContent();
+	            	break;
+	        }
+			
+			if(students.isEmpty()) {
+				throw new CustomerException("No any costomer found.");
+			}else 
+				return students;
+			
+		}else
+			throw new CustomerException("Inviled direction.");	
+			
+	}
+
+}

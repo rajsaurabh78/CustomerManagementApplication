@@ -1,0 +1,77 @@
+package com.sunbase.controller;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.crypto.SecretKey;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.sunbase.DTO.loginDTO;
+import com.sunbase.config.SecurityConstants;
+import com.sunbase.model.Admin;
+import com.sunbase.repository.AdminRepo;
+
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
+
+@RestController
+public class LoginController {
+
+	@Autowired
+    private AuthenticationManager authenticationManager;
+
+    @Autowired
+    private AdminRepo adminRepo;
+
+    @PostMapping("/signIn")
+    public Map<String, Object> login(@RequestBody loginDTO loginRequest) {
+        try {
+            // Authenticate the user
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            loginRequest.getLogin_id(), loginRequest.getPassword())
+            );
+
+            // Generate the JWT token
+            String jwt = generateToken(authentication);
+
+            // Fetch the admin details
+            Admin admin = adminRepo.findByEmail(authentication.getName())
+                    .orElseThrow(() -> new BadCredentialsException("User not found"));
+
+            // Prepare response
+            Map<String, Object> response = new HashMap<>();
+            response.put("token", jwt);
+            response.put("admin", admin);
+
+            return response;
+
+        } catch (AuthenticationException e) {
+            throw new BadCredentialsException("Invalid username or password");
+        }
+    }
+
+    private String generateToken(Authentication authentication) {
+        SecretKey key = Keys.hmacShaKeyFor(SecurityConstants.JWT_KEY.getBytes());
+
+        return Jwts.builder()
+                .setIssuer("Sunbase")
+                .setSubject("JWT Token")
+                .claim("username", authentication.getName())
+                .claim("authorities", authentication.getAuthorities())
+                .setIssuedAt(new java.util.Date())
+                .setExpiration(new java.util.Date(System.currentTimeMillis() + 30000000)) // Set expiration to 8 hours
+                .signWith(key)
+                .compact();
+    }
+	
+}

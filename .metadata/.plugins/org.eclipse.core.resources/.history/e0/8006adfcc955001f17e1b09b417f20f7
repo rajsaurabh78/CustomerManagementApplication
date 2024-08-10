@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Page with Auto-Invoked Function</title>
+</head>
+<body>
+    <h1>Profile</h1>
+    <a href="UserMethod.html"><button>Back</button></a>
+    <a href="index.html"><button>Home</button></a>
+    <div id="list"></div>
+    
+    <script>
+        let getStudent = () => {
+            let el = JSON.parse(localStorage.getItem("data"));
+            console.log(el);
+            document.querySelector("#list").innerHTML = ""; // Set to an empty string instead of an array
+
+            let div = document.createElement("div");
+            let n = document.createElement("h3");
+            n.innerText = "Name : " + el.name;
+            let id = document.createElement("h4");
+            id.innerText = "User Id : " + el.userId;
+            let e = document.createElement("h4");
+            e.innerText = "Email : " + el.email;
+            let m = document.createElement("h4");
+            m.innerText = "Mobile : " + el.mobile;
+            let D = document.createElement("h4");
+            D.innerText = "DOB : " + el.DOB;
+            let a = document.createElement("h4");
+            a.innerText = "Address : " + el.address;
+            let pay = document.createElement("h4");
+            pay.innerText = "Payment : " + el.payment;
+            let w = document.createElement("h4");
+            w.innerText = "WantedShift : " + el.wantedShift;
+            let ps = document.createElement("h4");
+            ps.innerText = "ProvidedShift : " + el.providedShift;
+
+            let remove = document.createElement("button");
+            remove.innerText = "Remove";
+            remove.style.color = "red";
+            remove.addEventListener("click", function(){
+                removebtnfunc(el.userId, token); // Ensure token is defined somewhere in your script
+            });
+
+            let update = document.createElement("button");
+            update.innerText = "Update";
+            update.style.color = "green";
+            update.addEventListener("click", function(){
+                localStorage.setItem("UserId", JSON.stringify(el.userId));
+                window.location.href = "ownProfileUpdate.html";
+            });
+
+            div.append(n, id, e, m, D, a, pay, w, ps, update, remove);
+            document.querySelector("#list").append(div);
+        };
+
+        // Assign the function to window.onload
+        window.onload = getStudent;
+    </script>
+</body>
+</html>

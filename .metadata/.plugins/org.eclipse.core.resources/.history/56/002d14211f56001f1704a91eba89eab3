@@ -1,0 +1,5 @@
+package com.sunbase.DTO;
+
+public class loginDTO {
+
+}

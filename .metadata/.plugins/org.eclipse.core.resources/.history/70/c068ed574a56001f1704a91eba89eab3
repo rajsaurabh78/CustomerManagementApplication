@@ -1,0 +1,39 @@
+package com.sunbase.controller;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.sunbase.DTO.loginDTO;
+
+import jakarta.validation.Valid;
+
+@RestController
+public class LoginController {
+	
+    @Autowired
+    private AuthenticationManager authenticationManager;
+
+	@PostMapping("/signIn")
+    public String login(@Valid @RequestBody loginDTO loginDTO) {
+		try {
+            // Create an authentication token from the provided username and password
+            Authentication authentication = new UsernamePasswordAuthenticationToken(
+                loginDTO.getLogin_id(), loginDTO.getPassword());
+
+            // Authenticate the user
+            authentication = authenticationManager.authenticate(authentication);
+
+            // If successful, the JwtTokenGeneratorFilter will automatically add the JWT token to the response header
+            return "Login successful. Check the Authorization header for your token.";
+        } catch (AuthenticationException e) {
+            return "Invalid username or password";
+        }
+    }
+	
+}

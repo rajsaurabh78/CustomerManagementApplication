@@ -1,0 +1,5 @@
+package com.sunbase.config;
+
+public class JwtUtil {
+
+}

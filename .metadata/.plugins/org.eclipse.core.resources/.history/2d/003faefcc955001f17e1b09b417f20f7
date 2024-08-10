@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .login-container {
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            margin-bottom: 15px;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="login-container">
+    	<h2>Login</h2>
+	    <input type="text" id="email" name="username" required  placeholder="Enter Email" >
+	    <input type="password" id="password" name="password" placeholder="Enter Password"  required>
+       	<button  type="submit"  onclick="aLogin()" >Login</button>
+    </div>
+</body>
+
+<script>
+   let aLogin=()=>{
+    let url = "http://localhost:8080/signIn";
+    let username =document.getElementById("email").value;
+    let password =document.getElementById("password").value;
+    let credentials = `${username}:${password}`;
+    let base64Credentials = btoa(credentials);
+
+     fetch(url, {
+        method: "GET",
+        headers: {
+            "Authorization": `Basic ${base64Credentials}`
+        }
+    })
+    .then(response => {
+        if (response.status == 202) {
+            response.json().then(data => {
+                localStorage.setItem("jwtToken",JSON.stringify(response.headers.get("Authorization")));
+  //            localStorage.setItem("data",JSON.stringify(data));
+  //            console.log(data)
+  		//		window.location.href="profile.html"	
+  				
+            });
+        
+               
+        } else {
+            alert("Authentication failed" );
+        }
+    })
+
+}
+</script>
+
+</html>

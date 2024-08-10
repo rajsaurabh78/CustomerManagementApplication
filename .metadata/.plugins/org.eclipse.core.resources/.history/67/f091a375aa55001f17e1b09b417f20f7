@@ -1,0 +1,19 @@
+package com.sunbase.service;
+
+import java.util.List;
+
+import com.sunbase.DTO.Admin;
+import com.sunbase.DTO.UpdateUserDTO;
+import com.sunbase.exception.LoginException;
+import com.sunbase.model.Customer;
+
+public interface AdminService{
+
+	public Customer addUser(Customer user);
+	public Customer addAdmin(Admin admin);
+	public String updateUser(UpdateUserDTO updateUserDTO) throws LoginException;
+	public List<Customer> getAllAdmin();
+	public Customer getOwnProfile();
+	public String removeUser(Integer id);
+
+}

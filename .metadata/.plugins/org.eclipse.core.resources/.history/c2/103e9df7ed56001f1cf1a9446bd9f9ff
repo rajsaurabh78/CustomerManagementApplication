@@ -1,0 +1,29 @@
+package com.sunbase.repository;
+
+import java.util.List;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
+import com.sunbase.model.Customer;
+
+public interface CustomerRepo extends JpaRepository<Customer,String>{
+	@Query(value="SELECT * FROM customer WHERE first_name LIKE %?%",nativeQuery =true )
+	Page<Customer> allCustomerByFirstName(String firstName,Pageable pageable);
+	Page<Customer> findByEmailContaining(String email,Pageable pageable);
+	Page<Customer> findByPhoneContaining(String phone,Pageable pageable);
+	Page<Customer> findByCityContaining(String city,Pageable pageable);
+	
+//	@Query(value="SELECT * FROM customer ORDER BY first_name :direction LIMIT :noOfItem OFFSET :pageNo",nativeQuery =true )
+//	PageRequest allCustomerByFirstNameSorting(@Param("direction")String direction,@Param("noOfItem") Integer noOfItem, @Param("pageNo")Integer pageNo);
+	
+	@Query(value = "SELECT * FROM customer ORDER BY first_name ASC LIMIT :noOfItem OFFSET :offset", nativeQuery = true)
+	List<Customer> findAllCustomersByFirstNameAsc(@Param("noOfItem") int noOfItem, @Param("offset") int offset);
+
+	@Query(value = "SELECT * FROM customer ORDER BY first_name DESC LIMIT :noOfItem OFFSET :offset", nativeQuery = true)
+	Page<Customer> findAllCustomersByFirstNameDesc(@Param("noOfItem") int noOfItem, @Param("offset") int offset);
+
+}

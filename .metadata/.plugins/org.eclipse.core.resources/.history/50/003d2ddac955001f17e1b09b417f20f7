@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        h2 {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        #list {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+        h3, h4 {
+            margin: 10px 0;
+        }
+        button {
+            padding: 10px 15px;
+            margin: 10px 5px 0 0;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button.update {
+            background-color: #28a745;
+            color: #fff;
+        }
+        button.update:hover {
+            background-color: #218838;
+        }
+        button.remove {
+            background-color: #dc3545;
+            color: #fff;
+        }
+        button.remove:hover {
+            background-color: #c82333;
+        }
+         img {
+            display: block;
+            margin: 10px auto;
+            width: 100px;
+            height: auto;
+            border-radius: 50%;
+            border: 2px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+    <div id="list"></div>
+
+    <script>
+        let profile = () => {
+            let token = JSON.parse(localStorage.getItem("jwtToken"));
+            let url = "http://localhost:8080/register/user/profile";
+
+            fetch(url, {
+                method: "GET",
+                headers: {
+                    "Authorization": `Bearer ${token}`
+                }
+            })
+            .then(response => {
+                if (response.status === 200) {
+                    response.json().then(data => {
+                        console.log(data);
+                        document.querySelector("#list").innerHTML = "";
+						
+                        let div = document.createElement("div");
+                        let pro=document.createElement("h2");
+                        pro.innerText="Profile"
+                        
+                        let n = document.createElement("h3");
+                        n.innerText = "Name : " + data.name;
+                        
+                        let id = document.createElement("h4");
+                        id.innerText = "User Id : " + data.userId;
+                        
+                        let e = document.createElement("h4");
+                        e.innerText = "Email : " + data.email;
+                        
+                        let m = document.createElement("h4");
+                        m.innerText = "Contact : " + data.phone;
+                        
+                        let D = document.createElement("h4");
+                        D.innerText = "DOB : " + data.dob;
+                        
+                        let a = document.createElement("h4");
+                        a.innerText = "Address : " + data.address;
+                        
+                        let photo=document.createElement("img")
+                        photo.src=data.photo
+
+                        let update = document.createElement("button");
+                        update.innerText = "Update";
+                        update.className = "update";
+                        update.addEventListener("click", function(){
+                            localStorage.setItem("UserId", JSON.stringify(data.userId));
+                          //  window.location.href = "ownProfileUpdate.html";
+                        });
+
+                        div.append(pro,photo,n, id, e, m, D, a, update);
+                        document.querySelector("#list").append(div);
+                    });
+                } else if (response.status === 401) {
+                    alert("Session expired.");
+                    window.location.href = "adminLogin.html";
+                } else {
+                    response.json().then(data => alert(data.message));
+                    window.location.reload();
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while fetching the profile.');
+            });
+        };
+
+        window.onload = profile;
+    </script>
+</body>
+</html>

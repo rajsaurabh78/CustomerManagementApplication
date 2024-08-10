@@ -1,0 +1,9 @@
+package com.sunbase.repository;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import com.sunbase.model.Authority;
+
+public interface AuthorityRepo extends JpaRepository<Authority,Integer>{
+
+}

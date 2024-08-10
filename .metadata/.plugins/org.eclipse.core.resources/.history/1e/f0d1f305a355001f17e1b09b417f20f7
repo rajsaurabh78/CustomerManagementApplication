@@ -1,0 +1,61 @@
+package com.sunbase.controller;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.example.demo.DTO.Admin;
+import com.example.demo.DTO.UpdateUserDTO;
+import com.example.demo.model.Users;
+import com.example.demo.service.UserService;
+
+import jakarta.validation.Valid;
+@RestController
+@RequestMapping("/admin")
+public class AdminSideController {
+	@Autowired
+	private UserService userService;
+	
+	@PostMapping("/register")
+	public ResponseEntity<Users> addAdminController(@Valid @RequestBody Admin admin){
+		
+		Users res=userService.addAdmin(admin);
+		return new ResponseEntity<>(res,HttpStatus.CREATED);
+		
+	}
+	
+	@GetMapping("/users")
+	public ResponseEntity<List<Users>> getAllAdminController(){
+		List<Users> res=userService.getAllAdmin();
+		return new ResponseEntity<>(res,HttpStatus.OK);
+	}
+	
+	@GetMapping("/user/profile")
+	public ResponseEntity<Users> getOwnProfileController(){
+		Users res=userService.getOwnProfile();
+		return new ResponseEntity<>(res,HttpStatus.OK);
+	}
+	
+	@PatchMapping("/user/update")
+	public ResponseEntity<String> updateUserController(@Valid @RequestBody UpdateUserDTO updateUserDTO){
+		String res=userService.updateUser(updateUserDTO);
+		return new ResponseEntity<>(res,HttpStatus.OK);
+	}
+	
+	@DeleteMapping("/delete/{id}")
+	public ResponseEntity<String> removeUserController(@Valid @PathVariable("id")Integer id){
+		String res=userService.removeUser(id);
+		return new ResponseEntity<>(res,HttpStatus.OK);
+	}
+	
+}

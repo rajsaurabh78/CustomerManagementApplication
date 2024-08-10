@@ -40,3 +40,32 @@ This project is a Customer Management CRUD application built using Spring Boot, 
 - **MySQL Database**
 
 ### Installation and Setup
+
+## Running the Application Using an IDE
+
+### IntelliJ IDEA or Eclipse or Visual Studio Code
+
+1. **Open the Project**:
+   - Launch Ide.
+   - Select `File` -> `Open` and navigate to the root directory of your project. Select the project and click `OK`.
+
+2. **Configure the Database**:
+   - Ensure that MySQL is running and you have created a database named `customer_db`.
+   - Update the database connection details in `src/main/resources/application.properties`:
+     ```properties
+     spring.datasource.url=jdbc:mysql://localhost:3306/your_database
+     spring.datasource.username=your_username
+     spring.datasource.password=your_password
+     ```
+
+3. **Import Maven Dependencies**:
+   - IntelliJ should automatically detect the `pom.xml` file and prompt you to import dependencies. If not, click on the `Maven` tool window , and then click the `Reload All Maven Projects` button.
+
+4. **Run the Application**:
+   - Locate the main class with the `@SpringBootApplication` annotation ( `src/main/java/com/yourpackage/YourApplication.java`).
+   - Right-click on the main class file and select `Run 'YourApplication.main()'`.
+
+5. **Access the Application**:
+   - Open web browser and navigate to `http://localhost:8080` to access the application.
+
+

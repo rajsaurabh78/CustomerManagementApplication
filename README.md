@@ -67,6 +67,12 @@ This project is a Customer Management CRUD application built using Spring Boot, 
 
 5. **Access the Application**:
    - Open web browser and navigate to `http://localhost:8080` to access the application.
+### Screenshot
+![Screenshot 2024-08-10 222645](https://github.com/user-attachments/assets/455d2750-1857-44be-ae57-14008b2a9e05)
+![Screenshot 2024-08-10 222746](https://github.com/user-attachments/assets/1bfbd1ba-1949-4ab5-a389-22aa0ec7977b)
+![Screenshot 2024-08-10 222825](https://github.com/user-attachments/assets/1b919cea-2577-4409-a3d7-c8c80264d959)
+![Screenshot 2024-08-10 222847](https://github.com/user-attachments/assets/4801b4e7-a969-40a9-9fa4-f2688a3f754e)
+![Screenshot 2024-08-10 222918](https://github.com/user-attachments/assets/2106c3c9-58fa-42a0-b1e0-8ef6c6a720c3)
 
 ### Entity Schema
 

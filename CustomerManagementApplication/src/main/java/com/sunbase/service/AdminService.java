@@ -10,6 +10,7 @@ import com.sunbase.model.Customer;
 public interface AdminService{
 
 	public String addCustomer(Customer customer);
+	public String addCustomerSync(List<UpdateCustomerDTO> list);
 	public Admin addAdmin(Admin admin);
 	public String updateCustomer(UpdateCustomerDTO updateUserDTO) throws LoginException;
 	public List<Customer> getAllCustomer(String search,Integer pageNo,Integer noOfItem,String fieldForSort,String direction,String fieldSerch);

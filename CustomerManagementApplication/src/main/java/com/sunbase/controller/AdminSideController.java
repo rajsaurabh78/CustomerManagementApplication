@@ -49,11 +49,6 @@ public class AdminSideController {
 		return new ResponseEntity<>(res,HttpStatus.OK);
 	}
 	
-	@GetMapping("/profile")
-	public ResponseEntity<Admin> getOwnProfileController(){
-		Admin res=adminService.getOwnProfile();
-		return new ResponseEntity<>(res,HttpStatus.OK);
-	}
 	
 	@GetMapping("/customer/list")
 	public ResponseEntity<List<UpdateCustomerDTO>> getAllCustomerListController(@Valid @RequestParam String token){
@@ -73,17 +68,18 @@ public class AdminSideController {
 		return new ResponseEntity<>(res,HttpStatus.OK);
 	}
 	
-	@DeleteMapping("/admins/{id}")
-	public ResponseEntity<String> deleteAdminController(@Valid @PathVariable("id")Integer id){
-		String res=adminService.deleteAdmin(id);
-		return new ResponseEntity<>(res,HttpStatus.OK);
-	}
 	@GetMapping("/customers/search")
 	public ResponseEntity<List<Customer>> getAllCustomersPaginationController(@Valid @RequestParam(required = false, defaultValue = "ASC")String direction
 			,@Valid @RequestParam(required = false, defaultValue = "1")Integer pageNo,@Valid @RequestParam(required = false, defaultValue = "10")Integer noOfItem
 			,@Valid @RequestParam(required = false, defaultValue = "uuid")String sortBy,@Valid @RequestParam(required = false, defaultValue = "")String search
 			,@Valid @RequestParam(required = false, defaultValue = "")String serchBy){
 		List<Customer> res=adminService.getAllCustomer(search, pageNo, noOfItem, sortBy, direction, serchBy);
+		return new ResponseEntity<>(res,HttpStatus.OK);
+	}
+	
+	@PostMapping("/sync/customers")
+	public ResponseEntity<String> addCustomerSyncController(@Valid @RequestBody List<UpdateCustomerDTO> customer){
+		String res=adminService.addCustomerSync(customer);
 		return new ResponseEntity<>(res,HttpStatus.OK);
 	}
 	

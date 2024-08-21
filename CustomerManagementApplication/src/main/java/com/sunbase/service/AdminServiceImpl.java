@@ -69,33 +69,12 @@ public class AdminServiceImpl implements AdminService{
 
 	@Override
 	public String addCustomer(Customer customer) {
-		if(customer.getUuid()==null) {
-			UUID uuid = UUID.randomUUID();
-			customer.setUuid(uuid.toString());
-			Customer newCustomer=customerRepo.save(customer);
-			return "Sucessfully registered with uuid :-"+newCustomer.getUuid();
-		}else {
-			Optional<Customer>opt= customerRepo.findById(customer.getUuid());
-			if(opt.isPresent()) {
-				Customer cust=opt.get();
-				cust.setFirstName(customer.getFirstName());
-				cust.setLast_name(customer.getLast_name());
-				cust.setDob(customer.getDob());
-				cust.setEmail(customer.getEmail());
-				cust.setPhone(customer.getPhone());
-				cust.setPhoto(customer.getPhoto());
-				cust.setAddress(customer.getAddress());
-				cust.setCity(customer.getCity());
-				cust.setGender(customer.getGender());
-				cust.setState(customer.getState());
-				cust.setStreet(customer.getStreet());
-				customerRepo.save(cust);
-				return "Sucessfully updated with  uuId :-"+cust.getUuid();
-			}
-			Customer newCustomer=customerRepo.save(customer);
-			return "Sucessfully registered with uuId :-"+newCustomer.getUuid();
-		}
-		
+
+		UUID uuid = UUID.randomUUID();
+		customer.setUuid(uuid.toString());
+		Customer newCustomer=customerRepo.save(customer);
+		return "Sucessfully registered with uuid :-"+newCustomer.getUuid();
+			
 	}
 
 	@Override
@@ -266,5 +245,45 @@ public class AdminServiceImpl implements AdminService{
        
         return Arrays.asList(response.getBody());
     }
+
+	@Override
+	public String addCustomerSync(List<UpdateCustomerDTO> list) {
+		
+		for(UpdateCustomerDTO customer:list) {
+			Optional<Customer>opt= customerRepo.findById(customer.getUuid());
+			if(opt.isPresent()) {
+				Customer cust=opt.get();
+				cust.setFirstName(customer.getFirst_name());
+				cust.setLast_name(customer.getLast_name());
+				cust.setDob(customer.getDob());
+				cust.setEmail(customer.getEmail());
+				cust.setPhone(customer.getPhone());
+				cust.setPhoto(customer.getPhoto());
+				cust.setAddress(customer.getAddress());
+				cust.setCity(customer.getCity());
+				cust.setGender(customer.getGender());
+				cust.setState(customer.getState());
+				cust.setStreet(customer.getStreet());
+				customerRepo.save(cust);
+			}else {
+				Customer cust=new Customer();
+				cust.setUuid(customer.getUuid());
+				cust.setFirstName(customer.getFirst_name());
+				cust.setLast_name(customer.getLast_name());
+				cust.setDob(customer.getDob());
+				cust.setEmail(customer.getEmail());
+				cust.setPhone(customer.getPhone());
+				cust.setPhoto(customer.getPhoto());
+				cust.setAddress(customer.getAddress());
+				cust.setCity(customer.getCity());
+				cust.setGender(customer.getGender());
+				cust.setState(customer.getState());
+				cust.setStreet(customer.getStreet());
+				customerRepo.save(cust);
+			}
+		}
+		
+		return "added.";
+	}
 
 }

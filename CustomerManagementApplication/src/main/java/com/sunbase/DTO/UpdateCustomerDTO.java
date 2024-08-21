@@ -4,7 +4,6 @@ import java.time.LocalDate;
 
 import com.sunbase.model.Gender;
 
-import jakarta.persistence.Column;
 import jakarta.validation.constraints.Past;
 import lombok.AllArgsConstructor;
 import lombok.Data;

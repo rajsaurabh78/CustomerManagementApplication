@@ -1,8 +1,0 @@
-package com.sunbase.DTO;
-
-public class loginDTO {
-	
-	private	String login_id;
-	private	String password;
-	
-}

@@ -1,5 +1,0 @@
-package com.sunbase.model;
-
-public enum Gender {
-
-}

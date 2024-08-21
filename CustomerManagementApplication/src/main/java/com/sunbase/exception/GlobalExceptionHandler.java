@@ -3,7 +3,6 @@ package com.sunbase.exception;
 import java.nio.file.AccessDeniedException;
 import java.time.LocalDateTime;
 
-import org.apache.tomcat.util.http.fileupload.impl.SizeException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

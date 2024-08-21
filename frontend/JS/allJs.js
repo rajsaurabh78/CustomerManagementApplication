@@ -7,21 +7,20 @@ let Login=()=>{
     let url = `${loginUrl1}`;
     let username =document.getElementById("email").value;
     let password =document.getElementById("password").value;
+    let credentials = `${username}:${password}`;
+    let base64Credentials = btoa(credentials);
 
-      fetch(url, {
-        method: "POST", 
+    fetch(url, {
+        method: "GET", 
         headers: {
-            "content-type": "application/json"
-        },body: JSON.stringify({
-            "login_id": username,
-            "password":password
-        })
+            "Authorization": `Basic ${base64Credentials}`
+        }
     })
     .then(response => {
-        if (response.status == 200) {
+        if (response.status == 202) {
             response.json().then(data => {
-                localStorage.setItem("jwtToken",JSON.stringify(data.access_token));
-                // console.log(data.access_token);
+                localStorage.setItem("jwtToken",JSON.stringify(response.headers.get("Authorization")));
+                // console.log(data);
                 alert("Successfully loged in.")
                              
                 window.location.href="showAllCustomers.html"
@@ -51,7 +50,7 @@ let aLogin=()=>{
     .then(response => {
         if (response.status == 200) {
             response.json().then(data => {
-                alert("Successfully loged in.")
+                // alert("Successfully loged in.")
                 // close("loginModal","close3");
                 display(data.access_token);
                
@@ -361,7 +360,6 @@ let updateCustomer=()=>{
 }
 
 let display=(token)=>{
-    close("loginModal","close3");
     let url =`${baseUrlPath}/admin/customer/list?token=${token}`
     let token2 = JSON.parse(localStorage.getItem("jwtToken"));
 
@@ -376,86 +374,7 @@ let display=(token)=>{
         if(response.status == 200){
             response.json().then(data => {
                 // console.log(data);
-                
-                document.querySelector("#list").innerHTML =[];
-                let table = document.createElement("table");
-                table.className = "student-table";
-                
-                let thead = document.createElement("thead");
-                let trHead = document.createElement("tr");
-                
-                let thIndex = document.createElement("th");
-                thIndex.innerText = "S.No";
-                let thName = document.createElement("th");
-                thName.innerText = "Name";
-                let thId = document.createElement("th");
-                thId.innerText = "User ID";
-                let thPhoto = document.createElement("th");
-                thPhoto.innerText = "Photo";
-                let thEmail = document.createElement("th");
-                thEmail.innerText = "Email";
-                let thMobile = document.createElement("th");
-                thMobile.innerText = "Phone";
-                let thAddress = document.createElement("th");
-                thAddress.innerText = "Address";
-                let thCity = document.createElement("th");
-                thCity.innerText = "City";
-                let thStreet = document.createElement("th");
-                thStreet.innerText = "Street";
-                let thState = document.createElement("th");
-                thState.innerText = "State";
-                let thActions = document.createElement("th");
-                thActions.innerText = "Actions";
-                
-                trHead.append(thIndex, thName, thId, thPhoto, thEmail, thMobile, thAddress, thStreet, thCity,thState, thActions);
-                thead.append(trHead);
-                table.append(thead);
-                
-                let tbody = document.createElement("tbody");
-                
-                data.forEach(({first_name,last_name,uuid, address, email,city, street, phone,state,photo}, i) => {
-                    let tr = document.createElement("tr");
-                    
-                    let tdIndex = document.createElement("td");
-                    tdIndex.innerText = i + 1;
-                    let tdName = document.createElement("td");
-                    tdName.innerText = first_name+" "+last_name;
-                    let tdId = document.createElement("td");
-                    tdId.innerText = uuid;
-                    let tdPhoto = document.createElement("td");
-                    let img = document.createElement("img");
-                    img.src = photo || defaultUrl; // Use a default photo URL if photoUrl is not available
-                    img.alt = "User Photo";
-                    img.className = "user-photo";
-                    tdPhoto.appendChild(img);
-                    let tdEmail = document.createElement("td");
-                    tdEmail.innerText = email;
-                    let tdMobile = document.createElement("td");
-                    tdMobile.innerText = phone;
-                    let tdAddress = document.createElement("td");
-                    tdAddress.innerText = address;
-                    let tdStreet = document.createElement("td");
-                    tdStreet.innerText = street;
-                    let tdCity= document.createElement("td");
-                    tdCity.innerText = city;
-                    let tdState = document.createElement("td");
-                    tdState.innerText = state;
-                    
-                    let tdActions = document.createElement("td");
-                    let addBtn = document.createElement("button");
-                    addBtn.innerText = "Add";
-                    addBtn.className = "edit-btn";
-                    addBtn.addEventListener("click", function(){
-                        addCustomerFromList(data[i], token2);
-                    });
-
-                    tdActions.append(addBtn);
-                    tr.append(tdIndex, tdName, tdId, tdPhoto, tdEmail, tdMobile , tdAddress,tdStreet,tdCity,tdState, tdActions);
-                    tbody.append(tr);
-                });
-                
-                table.append(tbody);
-                document.querySelector("#list").append(table);
+                addSyncData(token2,data);
             });
         } else if(response.status == 401) {
             alert("Session expired.");
@@ -465,48 +384,33 @@ let display=(token)=>{
     });
     
 }
+
+let addSyncData=(token,customerdata)=>{
+
+    let url =`${baseUrlPath}/admin/sync/customers`
+    fetch(url, {
+        method: "POST",   
+        headers: {
+            "content-type": "application/json",
+            "Authorization": `Bearer ${token}`,
+        },body: JSON.stringify(customerdata)
+    })
+    .then(response => {
+        if(response.status == 200){
+            response.text().then(data => {
+                alert(data);
+                window.location.reload()
+            });
+        } else if(response.status == 401) {
+            alert("Session expired.");
+        } else {
+            response.text().then(data => alert(data));
+        }
+    });
+}
 let openAddLoginModal=()=>{
     document.getElementById('loginModal').style.display = "block";
     close("loginModal","close3");
-}
-let addCustomerFromList=(data,token)=>{
-    // console.log(data);
-    fetch(`${baseUrlPath}/admin/register/customer`, {
-
-        method: "POST",
-        headers: {
-            "Authorization": `Bearer ${token}`,
-            "content-type": "application/json"
-        },
-        body: JSON.stringify({
-            "uuid":data.uuid,
-            "firstName": data.first_name,
-            "last_name":data.last_name,
-            "photo":data.photo,
-            "dob":data.dob,
-            "email":data.email,
-            "phone":data.phone,
-            "gender":data.gender,
-            "state":data.state,
-            "address":data.address,
-            "city":data.city,
-            "street":data.street
-        })
-        
-    }).then(response => {
-        if(response.status == 201){
-            response.text().then(data => {
-                alert(data)
-                // window.location.reload()
-            });
-        }else if(response.status == 401){
-            alert("Session expired .")
-            window.location.href="login.html"
-        }else{
-            response.json().then(data => alert(data.message));
-        }
-    })
-    
 }
 let nextFun=()=>{
     pageNo++
